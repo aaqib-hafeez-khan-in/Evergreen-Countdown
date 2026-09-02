@@ -1,4 +1,4 @@
-# ⏳ Evergreen Countdown
+# Evergreen Countdown
 
 A lightweight, dynamic countdown system for GitHub profiles, portfolio pages, and standalone web experiences.
 
@@ -7,7 +7,7 @@ A lightweight, dynamic countdown system for GitHub profiles, portfolio pages, an
   <p><i>Live SVG countdown powered by a Vercel serverless function.</i></p>
 </div>
 
-## ✨ What it does
+## What it does
 
 - **Dynamic SVG** — generates a live countdown suitable for GitHub profile READMEs and other embeds.
 - **Standalone web experience** — a responsive countdown page with dark/light theme support.
@@ -16,7 +16,7 @@ A lightweight, dynamic countdown system for GitHub profiles, portfolio pages, an
 - **No commit clutter** — countdown state is calculated at request/runtime instead of being committed back to the repository.
 - **Timezone-consistent API** — the serverless countdown uses explicit UTC semantics.
 
-## 🚀 Use the API
+## Use the API
 
 Embed the default countdown in a Markdown document:
 
@@ -41,7 +41,7 @@ The API endpoint is:
 
 `/api/countdown`
 
-## 🌐 Run the web experience
+## Run the web experience
 
 The repository contains a standalone HTML/CSS/JavaScript countdown page that can be hosted as a static site.
 
@@ -53,7 +53,7 @@ For GitHub Pages:
 
 The page calculates its countdown in the browser and automatically rolls over to the next year.
 
-## ☁️ Deploy the API
+## Deploy the API
 
 The API is implemented as a Vercel serverless function under `api/`.
 
@@ -66,14 +66,14 @@ To deploy your own instance:
 
 Deployment is intentionally manual; this repository does not require GitHub Actions for deployment.
 
-## 🛠️ Tech stack
+## Tech stack
 
 - **Frontend:** HTML, CSS, Vanilla JavaScript
 - **API:** Node.js serverless function
 - **Hosting:** GitHub Pages and Vercel
 - **SVG:** Server-generated dynamic SVG
 
-## 📁 Project structure
+## Project structure
 
 ```text
 .
@@ -87,7 +87,7 @@ Deployment is intentionally manual; this repository does not require GitHub Acti
 └── generate-countdown.js
 ```
 
-## 🧭 Roadmap
+## Roadmap
 
 The project is being developed toward a reusable countdown platform with:
 
@@ -100,12 +100,12 @@ The project is being developed toward a reusable countdown platform with:
 
 See the [project epic](https://github.com/aaqib-hafeez-khan-in/Evergreen-Countdown/issues/1) for the broader roadmap and planned phases.
 
-## 🤝 Contributing
+## Contributing
 
 Found a bug or have an improvement in mind? Open an issue or submit a focused pull request.
 
 Please keep changes small and focused, avoid unnecessary dependencies, and follow the repository's existing conventions.
 
-## 📄 License
+## License
 
 No license has currently been declared for this repository.

@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Countdown | Dynamic</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;800&family=JetBrains+Mono:wght@700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="icon" type="image/png" href="favicon.png">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body data-theme="dark">
+    <div class="stars"></div>
+
+    <div class="theme-toggle">
+        <button id="themeToggle" aria-label="Toggle theme">
+            <i class="fas fa-moon"></i>
+        </button>
+    </div>
+
+    <main class="container">
+        <div class="title-wrap">
+            <p class="title">Official Countdown</p>
+            <h1 class="main-heading">Targeting <span class="target-year-text">----</span></h1>
+        </div>
+        
+        <div class="countdown" role="timer" aria-live="polite">
+            <div class="time-segment">
+                <div class="time-card">
+                    <span class="number" id="days">00</span>
+                </div>
+                <span class="label">Days</span>
+            </div>
+            <div class="time-segment">
+                <div class="time-card">
+                    <span class="number" id="hours">00</span>
+                </div>
+                <span class="label">Hours</span>
+            </div>
+            <div class="time-segment">
+                <div class="time-card">
+                    <span class="number" id="minutes">00</span>
+                </div>
+                <span class="label">Minutes</span>
+            </div>
+            <div class="time-segment">
+                <div class="time-card">
+                    <span class="number" id="seconds">00</span>
+                </div>
+                <span class="label">Seconds</span>
+            </div>
+        </div>
+
+        <div class="quote-container">
+            <p id="quote" aria-live="polite">"The magic in new beginnings is truly the most powerful of them all."</p>
+        </div>
+    </main>
+
+    <div id="newYearMessage" class="new-year-message hidden">
+        <h2 class="target-year-text">2027</h2>
+        <p>A new beginning has arrived.</p>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/canvas-confetti/1.6.0/confetti.browser.min.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>

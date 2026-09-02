@@ -1,0 +1,23 @@
+{
+  "rewrites": [
+    {
+      "source": "/api/countdown",
+      "destination": "/api/countdown.js"
+    },
+    {
+      "source": "/api/countdown.svg",
+      "destination": "/api/countdown.js"
+    }
+  ],
+  "headers": [
+    {
+      "source": "/favicon.png",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    }
+  ]
+}

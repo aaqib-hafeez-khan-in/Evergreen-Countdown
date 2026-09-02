@@ -15,9 +15,9 @@ const themeToggleBtn = document.getElementById('themeToggle');
 const newYearMessage = document.getElementById('newYearMessage');
 
 const now = new Date();
-const currentYear = now.getFullYear();
-const targetYear = currentYear + (now.getMonth() === 0 && now.getDate() === 1 ? 0 : 1);
-const newYearTime = new Date(`January 1, ${targetYear} 00:00:00`).getTime();
+const currentYear = now.getUTCFullYear();
+const targetYear = currentYear + (now.getUTCMonth() === 0 && now.getUTCDate() === 1 ? 0 : 1);
+const newYearTime = Date.UTC(targetYear, 0, 1);
 const displayYear = targetYear;
 document.querySelectorAll('.target-year-text').forEach(el => el.textContent = displayYear);
 

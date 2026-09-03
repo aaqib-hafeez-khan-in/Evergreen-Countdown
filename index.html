@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="color-scheme" content="dark light">
     <title>Countdown | Dynamic</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -12,21 +13,22 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body data-theme="dark">
-    <div class="stars"></div>
+    <div class="stars" aria-hidden="true"></div>
 
-    <div class="theme-toggle">
-        <button id="themeToggle" aria-label="Toggle theme">
-            <i class="fas fa-moon"></i>
+    <header class="theme-toggle">
+        <button id="themeToggle" type="button" aria-label="Switch to light theme" aria-pressed="false">
+            <i class="fas fa-moon" aria-hidden="true"></i>
         </button>
-    </div>
+    </header>
 
     <main class="container">
-        <div class="title-wrap">
-            <p class="title">Official Countdown</p>
-            <h1 class="main-heading">Targeting <span class="target-year-text">----</span></h1>
-        </div>
+        <header class="title-wrap">
+            <p id="title" class="title">Official Countdown</p>
+            <h1 id="mainHeading" class="main-heading">Countdown</h1>
+            <p id="timezone" class="timezone">Target timezone: UTC</p>
+        </header>
         
-        <div class="countdown" role="timer" aria-live="polite">
+        <section id="countdown" class="countdown" role="timer" aria-label="Countdown to target" aria-live="polite" aria-atomic="true">
             <div class="time-segment">
                 <div class="time-card">
                     <span class="number" id="days">00</span>
@@ -51,18 +53,19 @@
                 </div>
                 <span class="label">Seconds</span>
             </div>
-        </div>
+        </section>
 
-        <div class="quote-container">
-            <p id="quote" aria-live="polite">"The magic in new beginnings is truly the most powerful of them all."</p>
-        </div>
+        <aside class="quote-container" aria-label="Countdown quote">
+            <p id="quote" aria-live="off">The magic in new beginnings is truly the most powerful of them all.</p>
+        </aside>
     </main>
 
-    <div id="newYearMessage" class="new-year-message hidden">
-        <h2 class="target-year-text">2027</h2>
+    <section id="newYearMessage" class="new-year-message" aria-hidden="true" aria-live="assertive" hidden>
+        <h2>Countdown complete</h2>
         <p>A new beginning has arrived.</p>
-    </div>
+    </section>
 
+    <script src="config.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/canvas-confetti/1.6.0/confetti.browser.min.js"></script>
     <script src="script.js"></script>
 </body>

@@ -6,7 +6,9 @@ const quotes = [
     "Year's end is neither an end nor a beginning but a going on."
 ];
 
-const config = window.countdownConfig;
+const baseConfig = window.countdownConfig;
+const engine = window.CountdownEngine;
+const params = new URLSearchParams(window.location.search);
 const daysEl = document.getElementById('days');
 const hoursEl = document.getElementById('hours');
 const minutesEl = document.getElementById('minutes');
@@ -19,7 +21,23 @@ const titleEl = document.getElementById('title');
 const timezoneEl = document.getElementById('timezone');
 const countdownEl = document.getElementById('countdown');
 
-let targetTime = new Date(config.targetDate).getTime();
+function getRuntimeConfig() {
+    const targetDate = params.get('date') || baseConfig.targetDate;
+    const timezone = params.get('timezone') || baseConfig.timezone;
+    const label = params.get('label') || baseConfig.label;
+    const title = params.get('title') || baseConfig.title;
+    const completionMessage = params.get('completion') || baseConfig.completionMessage;
+
+    return engine.resolveConfig({
+        targetDate,
+        timezone,
+        label,
+        title,
+        completionMessage
+    });
+}
+
+const config = getRuntimeConfig();
 let completed = false;
 
 function setTheme(theme) {
@@ -45,7 +63,7 @@ function createStars() {
         return;
     }
 
-    for (let i = 0; i < starCount; i++) {
+    for (let i = 0; i < starCount; i += 1) {
         const star = document.createElement('div');
         star.style.cssText = `position:absolute;width:2px;height:2px;background:#fff;border-radius:50%;top:${Math.random() * 100}%;left:${Math.random() * 100}%;animation:twinkle ${2 + Math.random() * 3}s infinite;opacity:${Math.random()};`;
         starsContainer.appendChild(star);
@@ -53,7 +71,7 @@ function createStars() {
 }
 
 function setRandomQuote() {
-    if (!config.display.quote) {
+    if (!baseConfig.display.quote) {
         quoteEl.hidden = true;
         return;
     }
@@ -69,7 +87,7 @@ function showCompletionState() {
     minutesEl.textContent = '00';
     secondsEl.textContent = '00';
     countdownEl.setAttribute('aria-label', `Countdown complete. ${config.completionMessage}`);
-    newYearMessage.querySelector('h2').textContent = config.title.replace(/^.*?\s/, '') || config.title;
+    newYearMessage.querySelector('h2').textContent = config.title;
     newYearMessage.querySelector('p').textContent = config.completionMessage;
     newYearMessage.hidden = false;
     newYearMessage.setAttribute('aria-hidden', 'false');
@@ -82,23 +100,17 @@ function showCompletionState() {
 function updateCountdown() {
     if (completed) return;
 
-    const timeDifference = targetTime - Date.now();
+    const remaining = engine.getRemaining(config.targetTime);
 
-    if (timeDifference <= 0) {
+    if (remaining.expired) {
         showCompletionState();
         return;
     }
 
-    const totalSeconds = Math.floor(timeDifference / 1000);
-    const days = Math.floor(totalSeconds / 86400);
-    const hours = Math.floor((totalSeconds % 86400) / 3600);
-    const minutes = Math.floor((totalSeconds % 3600) / 60);
-    const seconds = totalSeconds % 60;
-
-    daysEl.textContent = String(days).padStart(2, '0');
-    hoursEl.textContent = String(hours).padStart(2, '0');
-    minutesEl.textContent = String(minutes).padStart(2, '0');
-    secondsEl.textContent = String(seconds).padStart(2, '0');
+    daysEl.textContent = String(remaining.days).padStart(2, '0');
+    hoursEl.textContent = String(remaining.hours).padStart(2, '0');
+    minutesEl.textContent = String(remaining.minutes).padStart(2, '0');
+    secondsEl.textContent = String(remaining.seconds).padStart(2, '0');
 }
 
 function celebrateNewYear() {
@@ -118,22 +130,14 @@ function celebrateNewYear() {
 
 function init() {
     const savedTheme = localStorage.getItem('countdown-theme');
-    const initialTheme = savedTheme === 'light' || savedTheme === 'dark' ? savedTheme : config.theme;
+    const initialTheme = savedTheme === 'light' || savedTheme === 'dark' ? savedTheme : baseConfig.theme;
 
     titleEl.textContent = config.label;
     mainHeading.textContent = config.title;
     timezoneEl.textContent = `Target timezone: ${config.timezone}`;
-    secondsEl.closest('.time-segment').hidden = !config.display.seconds;
+    secondsEl.closest('.time-segment').hidden = !baseConfig.display.seconds;
     newYearMessage.hidden = true;
     newYearMessage.setAttribute('aria-hidden', 'true');
-
-    if (!Number.isFinite(targetTime)) {
-        mainHeading.textContent = 'Countdown unavailable';
-        countdownEl.hidden = true;
-        quoteEl.textContent = 'The configured target date is invalid.';
-        setTheme(initialTheme);
-        return;
-    }
 
     setTheme(initialTheme);
     createStars();

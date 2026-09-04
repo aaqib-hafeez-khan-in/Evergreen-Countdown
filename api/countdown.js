@@ -1,5 +1,12 @@
 const CountdownEngine = require('../countdown-engine.js');
 
+const MAX_QUERY_LENGTH = 160;
+const MAX_LABEL_LENGTH = 60;
+const MAX_TITLE_LENGTH = 80;
+const MAX_COMPLETION_LENGTH = 120;
+const YEAR_PATTERN = /^\d{4}$/;
+const DATE_PATTERN = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(?::\d{2}(?:\.\d{1,3})?)?(?:Z|[+-]\d{2}:?\d{2})?$/;
+
 function escapeXml(value) {
   return String(value)
     .replace(/&/g, '&amp;')
@@ -9,26 +16,38 @@ function escapeXml(value) {
     .replace(/'/g, '&apos;');
 }
 
-function getQueryValue(req, key) {
+function getQueryValue(req, key, maxLength = MAX_QUERY_LENGTH) {
   const value = req.query && req.query[key];
-  return typeof value === 'string' ? value.trim() : '';
+  if (typeof value !== 'string') return '';
+  return value.trim().slice(0, maxLength);
+}
+
+function getTargetDate(req) {
+  const requestedDate = getQueryValue(req, 'date');
+  if (requestedDate) return DATE_PATTERN.test(requestedDate) ? requestedDate : '';
+
+  const legacyYear = getQueryValue(req, 'year', 4);
+  if (legacyYear) return YEAR_PATTERN.test(legacyYear) ? `${legacyYear}-01-01T00:00:00` : '';
+
+  return '';
 }
 
 export default function handler(req, res) {
   const now = new Date();
-  const legacyYear = getQueryValue(req, 'year');
-  const requestedDate = getQueryValue(req, 'date');
-  const timezone = getQueryValue(req, 'timezone') || 'UTC';
-  const targetDate = requestedDate || (legacyYear ? `${legacyYear}-01-01T00:00:00` : CountdownEngine.getDefaultTargetDate(now));
+  const timezoneInput = getQueryValue(req, 'timezone');
+  const timezone = CountdownEngine.validateTimezone(timezoneInput) ? timezoneInput : 'UTC';
+  const targetDate = getTargetDate(req);
   const config = CountdownEngine.resolveConfig({
-    targetDate,
+    targetDate: targetDate || CountdownEngine.getDefaultTargetDate(now),
     timezone,
-    label: getQueryValue(req, 'label'),
-    title: getQueryValue(req, 'title'),
-    completionMessage: getQueryValue(req, 'completion')
+    label: getQueryValue(req, 'label', MAX_LABEL_LENGTH),
+    title: getQueryValue(req, 'title', MAX_TITLE_LENGTH),
+    completionMessage: getQueryValue(req, 'completion', MAX_COMPLETION_LENGTH)
   }, now);
-  const targetIsValid = Number.isFinite(CountdownEngine.parseTargetDate(targetDate, timezone));
-  const remaining = CountdownEngine.getRemaining(config.targetTime, now.getTime());
+  const requestedTargetTime = targetDate ? CountdownEngine.parseTargetDate(targetDate, timezone) : config.targetTime;
+  const targetIsValid = Number.isFinite(requestedTargetTime);
+  const targetTime = targetIsValid ? requestedTargetTime : config.targetTime;
+  const remaining = CountdownEngine.getRemaining(targetTime, now.getTime());
 
   const ACCENT = '#A855F7';
   const BG = '#0D1117';
@@ -87,7 +106,9 @@ export default function handler(req, res) {
   <text x="${W - 40}" y="204" font-family="${FONT}" font-size="9" fill="${DIM}" text-anchor="end">LIVE PREVIEW</text>
 </svg>`;
 
-  res.setHeader('Content-Type', 'image/svg+xml');
-  res.setHeader('Cache-Control', 's-maxage=1, stale-while-revalidate');
-  return res.send(svg);
+  res.setHeader('Content-Type', 'image/svg+xml; charset=utf-8');
+  res.setHeader('Cache-Control', 'public, s-maxage=1, stale-while-revalidate=59');
+  res.setHeader('Content-Security-Policy', "default-src 'none'; style-src 'unsafe-inline'");
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  return res.status(targetIsValid ? 200 : 400).send(svg);
 }

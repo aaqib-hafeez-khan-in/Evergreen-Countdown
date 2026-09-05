@@ -4,70 +4,106 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="color-scheme" content="dark light">
-    <title>Countdown | Dynamic</title>
+    <meta name="description" content="Create and share a beautiful countdown to any date and time.">
+    <title>Evergreen Countdown</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;800&family=JetBrains+Mono:wght@700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link rel="icon" type="image/png" href="favicon.png">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
 <body data-theme="dark">
-    <div class="stars" aria-hidden="true"></div>
+    <div class="ambient ambient-one" aria-hidden="true"></div>
+    <div class="ambient ambient-two" aria-hidden="true"></div>
 
-    <header class="theme-toggle">
-        <button id="themeToggle" type="button" aria-label="Switch to light theme" aria-pressed="false">
-            <i class="fas fa-moon" aria-hidden="true"></i>
+    <header class="topbar">
+        <a class="brand" href="./" aria-label="Evergreen Countdown home">
+            <span class="brand-mark" aria-hidden="true">E</span>
+            <span>Evergreen Countdown</span>
+        </a>
+        <button id="themeToggle" class="icon-button" type="button" aria-label="Switch to light theme" aria-pressed="false">
+            <span id="themeIcon" aria-hidden="true">☾</span>
         </button>
     </header>
 
-    <main class="container">
-        <header class="title-wrap">
-            <p id="title" class="title">Official Countdown</p>
-            <h1 id="mainHeading" class="main-heading">Countdown</h1>
-            <p id="timezone" class="timezone">Target timezone: UTC</p>
-        </header>
-        
-        <section id="countdown" class="countdown" role="timer" aria-label="Countdown to target" aria-live="polite" aria-atomic="true">
-            <div class="time-segment">
-                <div class="time-card">
-                    <span class="number" id="days">00</span>
-                </div>
-                <span class="label">Days</span>
-            </div>
-            <div class="time-segment">
-                <div class="time-card">
-                    <span class="number" id="hours">00</span>
-                </div>
-                <span class="label">Hours</span>
-            </div>
-            <div class="time-segment">
-                <div class="time-card">
-                    <span class="number" id="minutes">00</span>
-                </div>
-                <span class="label">Minutes</span>
-            </div>
-            <div class="time-segment">
-                <div class="time-card">
-                    <span class="number" id="seconds">00</span>
-                </div>
-                <span class="label">Seconds</span>
-            </div>
+    <main class="page-shell">
+        <section class="hero" aria-labelledby="pageTitle">
+            <div class="eyebrow">COUNTDOWN BUILDER</div>
+            <h1 id="pageTitle">Make time worth counting.</h1>
+            <p>Create a personal countdown, preview it instantly, and share it with one link.</p>
         </section>
 
-        <aside class="quote-container" aria-label="Countdown quote">
-            <p id="quote" aria-live="off">The magic in new beginnings is truly the most powerful of them all.</p>
-        </aside>
-    </main>
+        <section class="workspace" aria-label="Countdown builder">
+            <form id="configForm" class="config-panel">
+                <div class="panel-heading">
+                    <div>
+                        <span class="panel-kicker">CONFIGURE</span>
+                        <h2>Your countdown</h2>
+                    </div>
+                    <span class="status-dot" aria-hidden="true"></span>
+                </div>
 
-    <section id="newYearMessage" class="new-year-message" aria-hidden="true" aria-live="assertive" hidden>
-        <h2>Countdown complete</h2>
-        <p>A new beginning has arrived.</p>
-    </section>
+                <div class="field-grid">
+                    <label class="field field-wide">
+                        <span>Target date and time</span>
+                        <input id="targetDate" name="date" type="datetime-local" required>
+                    </label>
+
+                    <label class="field">
+                        <span>Timezone</span>
+                        <input id="timezone" name="timezone" type="text" value="UTC" placeholder="Asia/Kolkata" autocomplete="off">
+                    </label>
+
+                    <label class="field">
+                        <span>Label</span>
+                        <input id="label" name="label" type="text" maxlength="60" value="Official Countdown" placeholder="Launch day">
+                    </label>
+
+                    <label class="field field-wide">
+                        <span>Title</span>
+                        <input id="title" name="title" type="text" maxlength="80" value="Countdown" placeholder="Product Launch">
+                    </label>
+
+                    <label class="field field-wide">
+                        <span>Completion message</span>
+                        <input id="completion" name="completion" type="text" maxlength="120" value="A new beginning has arrived." placeholder="It is time.">
+                    </label>
+                </div>
+
+                <div class="form-actions">
+                    <button class="primary-button" type="submit">Update countdown</button>
+                    <button id="resetButton" class="secondary-button" type="button">Reset</button>
+                </div>
+                <p id="formStatus" class="form-status" role="status" aria-live="polite"></p>
+            </form>
+
+            <section class="preview-panel" aria-label="Countdown preview">
+                <div class="preview-header">
+                    <span>LIVE PREVIEW</span>
+                    <button id="shareButton" class="share-button" type="button">Copy share link</button>
+                </div>
+                <div class="preview-content">
+                    <p id="previewLabel" class="preview-label">Official Countdown</p>
+                    <h2 id="previewTitle">Countdown</h2>
+                    <p id="previewTimezone" class="preview-timezone">Target timezone: UTC</p>
+
+                    <div id="countdown" class="countdown" role="timer" aria-label="Countdown to target" aria-live="polite" aria-atomic="true">
+                        <div class="time-segment"><span id="days" class="number">00</span><span class="unit">Days</span></div>
+                        <div class="time-segment"><span id="hours" class="number">00</span><span class="unit">Hours</span></div>
+                        <div class="time-segment"><span id="minutes" class="number">00</span><span class="unit">Minutes</span></div>
+                        <div class="time-segment"><span id="seconds" class="number">00</span><span class="unit">Seconds</span></div>
+                    </div>
+
+                    <div id="completionState" class="completion-state" hidden>
+                        <span class="completion-badge">COMPLETE</span>
+                        <p id="completionMessage">A new beginning has arrived.</p>
+                    </div>
+                </div>
+            </section>
+        </section>
+    </main>
 
     <script src="countdown-engine.js"></script>
     <script src="config.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/canvas-confetti/1.6.0/confetti.browser.min.js"></script>
     <script src="script.js"></script>
 </body>
 </html>

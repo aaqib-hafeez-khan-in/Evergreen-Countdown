@@ -9,142 +9,192 @@ const quotes = [
 const baseConfig = window.countdownConfig;
 const engine = window.CountdownEngine;
 const params = new URLSearchParams(window.location.search);
+const form = document.getElementById('configForm');
+const targetDateEl = document.getElementById('targetDate');
+const timezoneEl = document.getElementById('timezone');
+const labelEl = document.getElementById('label');
+const titleEl = document.getElementById('title');
+const completionEl = document.getElementById('completion');
+const previewLabel = document.getElementById('previewLabel');
+const previewTitle = document.getElementById('previewTitle');
+const previewTimezone = document.getElementById('previewTimezone');
+const completionMessage = document.getElementById('completionMessage');
+const completionState = document.getElementById('completionState');
+const countdownEl = document.getElementById('countdown');
 const daysEl = document.getElementById('days');
 const hoursEl = document.getElementById('hours');
 const minutesEl = document.getElementById('minutes');
 const secondsEl = document.getElementById('seconds');
-const quoteEl = document.getElementById('quote');
-const themeToggleBtn = document.getElementById('themeToggle');
-const newYearMessage = document.getElementById('newYearMessage');
-const mainHeading = document.getElementById('mainHeading');
-const titleEl = document.getElementById('title');
-const timezoneEl = document.getElementById('timezone');
-const countdownEl = document.getElementById('countdown');
+const formStatus = document.getElementById('formStatus');
+const themeToggle = document.getElementById('themeToggle');
+const themeIcon = document.getElementById('themeIcon');
+const shareButton = document.getElementById('shareButton');
+const resetButton = document.getElementById('resetButton');
+
+let activeConfig;
+let completed = false;
+
+function getDefaultTargetDate() {
+    const now = new Date();
+    const target = new Date(now.getFullYear() + 1, 0, 1, 0, 0, 0);
+    return toDateTimeLocal(target);
+}
+
+function toDateTimeLocal(date) {
+    const offset = date.getTimezoneOffset();
+    const local = new Date(date.getTime() - offset * 60000);
+    return local.toISOString().slice(0, 16);
+}
+
+function fromQueryDate(value) {
+    if (!value) return '';
+    const parsed = new Date(value);
+    return Number.isNaN(parsed.getTime()) ? '' : toDateTimeLocal(parsed);
+}
 
 function getRuntimeConfig() {
     const targetDate = params.get('date') || baseConfig.targetDate;
     const timezone = params.get('timezone') || baseConfig.timezone;
     const label = params.get('label') || baseConfig.label;
     const title = params.get('title') || baseConfig.title;
-    const completionMessage = params.get('completion') || baseConfig.completionMessage;
+    const completionMessageValue = params.get('completion') || baseConfig.completionMessage;
 
     return engine.resolveConfig({
         targetDate,
         timezone,
         label,
         title,
-        completionMessage
+        completionMessage: completionMessageValue
     });
 }
 
-const config = getRuntimeConfig();
-let completed = false;
-
 function setTheme(theme) {
     const nextTheme = theme === 'light' ? 'light' : 'dark';
-    document.body.setAttribute('data-theme', nextTheme);
-    themeToggleBtn.setAttribute('aria-pressed', String(nextTheme === 'light'));
-    themeToggleBtn.setAttribute('aria-label', `Switch to ${nextTheme === 'dark' ? 'light' : 'dark'} theme`);
-    themeToggleBtn.innerHTML = nextTheme === 'dark' ? '<i class="fas fa-moon" aria-hidden="true"></i>' : '<i class="fas fa-sun" aria-hidden="true"></i>';
+    document.body.dataset.theme = nextTheme;
+    themeToggle.setAttribute('aria-pressed', String(nextTheme === 'light'));
+    themeToggle.setAttribute('aria-label', `Switch to ${nextTheme === 'dark' ? 'light' : 'dark'} theme`);
+    themeIcon.textContent = nextTheme === 'dark' ? '☾' : '☀';
 }
 
 function toggleTheme() {
-    const isDark = document.body.getAttribute('data-theme') === 'dark';
-    const nextTheme = isDark ? 'light' : 'dark';
+    const nextTheme = document.body.dataset.theme === 'dark' ? 'light' : 'dark';
     setTheme(nextTheme);
     localStorage.setItem('countdown-theme', nextTheme);
 }
 
-function createStars() {
-    const starsContainer = document.querySelector('.stars');
-    const starCount = 100;
-
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-        return;
-    }
-
-    for (let i = 0; i < starCount; i += 1) {
-        const star = document.createElement('div');
-        star.style.cssText = `position:absolute;width:2px;height:2px;background:#fff;border-radius:50%;top:${Math.random() * 100}%;left:${Math.random() * 100}%;animation:twinkle ${2 + Math.random() * 3}s infinite;opacity:${Math.random()};`;
-        starsContainer.appendChild(star);
-    }
+function applyFormValues(config) {
+    targetDateEl.value = fromQueryDate(config.targetDate) || getDefaultTargetDate();
+    timezoneEl.value = config.timezone;
+    labelEl.value = config.label;
+    titleEl.value = config.title;
+    completionEl.value = config.completionMessage;
 }
 
-function setRandomQuote() {
-    if (!baseConfig.display.quote) {
-        quoteEl.hidden = true;
-        return;
-    }
-    const randomIndex = Math.floor(Math.random() * quotes.length);
-    quoteEl.textContent = quotes[randomIndex];
+function formConfig() {
+    const targetDate = targetDateEl.value;
+    const timezone = timezoneEl.value.trim() || 'UTC';
+    return engine.resolveConfig({
+        targetDate,
+        timezone,
+        label: labelEl.value.trim() || 'Countdown',
+        title: titleEl.value.trim() || 'Countdown',
+        completionMessage: completionEl.value.trim() || 'Countdown complete.'
+    });
 }
 
-function showCompletionState() {
+function renderPreview(config) {
+    previewLabel.textContent = config.label;
+    previewTitle.textContent = config.title;
+    previewTimezone.textContent = `Target timezone: ${config.timezone}`;
+    completionMessage.textContent = config.completionMessage;
+}
+
+function showCompletion() {
     if (completed) return;
     completed = true;
-    daysEl.textContent = '00';
-    hoursEl.textContent = '00';
-    minutesEl.textContent = '00';
-    secondsEl.textContent = '00';
-    countdownEl.setAttribute('aria-label', `Countdown complete. ${config.completionMessage}`);
-    newYearMessage.querySelector('h2').textContent = config.title;
-    newYearMessage.querySelector('p').textContent = config.completionMessage;
-    newYearMessage.hidden = false;
-    newYearMessage.setAttribute('aria-hidden', 'false');
-
-    if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches && typeof confetti === 'function') {
-        celebrateNewYear();
-    }
+    countdownEl.hidden = true;
+    completionState.hidden = false;
+    countdownEl.setAttribute('aria-label', `Countdown complete. ${activeConfig.completionMessage}`);
 }
 
 function updateCountdown() {
-    if (completed) return;
-
-    const remaining = engine.getRemaining(config.targetTime);
-
+    if (!activeConfig || completed) return;
+    const remaining = engine.getRemaining(activeConfig.targetTime);
     if (remaining.expired) {
-        showCompletionState();
+        showCompletion();
         return;
     }
-
+    countdownEl.hidden = false;
+    completionState.hidden = true;
     daysEl.textContent = String(remaining.days).padStart(2, '0');
     hoursEl.textContent = String(remaining.hours).padStart(2, '0');
     minutesEl.textContent = String(remaining.minutes).padStart(2, '0');
     secondsEl.textContent = String(remaining.seconds).padStart(2, '0');
+    countdownEl.setAttribute('aria-label', `${remaining.days} days, ${remaining.hours} hours, ${remaining.minutes} minutes, ${remaining.seconds} seconds remaining`);
 }
 
-function celebrateNewYear() {
-    const duration = 15000;
-    const animationEnd = Date.now() + duration;
+function buildShareUrl(config) {
+    const url = new URL(window.location.href);
+    url.search = '';
+    url.searchParams.set('date', config.targetDate);
+    url.searchParams.set('timezone', config.timezone);
+    url.searchParams.set('label', config.label);
+    url.searchParams.set('title', config.title);
+    url.searchParams.set('completion', config.completionMessage);
+    return url.toString();
+}
 
-    function frame() {
-        const timeLeft = animationEnd - Date.now();
-        if (timeLeft <= 0) return;
-        confetti({ particleCount: 3, angle: 60, spread: 55, origin: { x: 0 }, colors: ['#ff0000', '#00ff00', '#0000ff'] });
-        confetti({ particleCount: 3, angle: 120, spread: 55, origin: { x: 1 }, colors: ['#ff0000', '#00ff00', '#0000ff'] });
-        requestAnimationFrame(frame);
+async function copyShareLink() {
+    const url = buildShareUrl(activeConfig);
+    try {
+        await navigator.clipboard.writeText(url);
+        shareButton.textContent = 'Link copied';
+        setTimeout(() => { shareButton.textContent = 'Copy share link'; }, 1800);
+    } catch {
+        formStatus.textContent = url;
     }
+}
 
-    frame();
+function updateFromForm(event) {
+    event.preventDefault();
+    const config = formConfig();
+    activeConfig = config;
+    completed = false;
+    renderPreview(config);
+    updateCountdown();
+    formStatus.textContent = 'Countdown updated. Share the link when you are ready.';
+    const url = new URL(window.location.href);
+    url.search = buildShareUrl(config).split('?')[1] || '';
+    window.history.replaceState({}, '', url);
+}
+
+function resetForm() {
+    params.delete('date');
+    params.delete('timezone');
+    params.delete('label');
+    params.delete('title');
+    params.delete('completion');
+    activeConfig = getRuntimeConfig();
+    applyFormValues(activeConfig);
+    renderPreview(activeConfig);
+    completed = false;
+    updateCountdown();
+    window.history.replaceState({}, '', `${window.location.pathname}${window.location.hash}`);
+    formStatus.textContent = 'Reset to the default countdown.';
 }
 
 function init() {
+    activeConfig = getRuntimeConfig();
+    applyFormValues(activeConfig);
+    renderPreview(activeConfig);
     const savedTheme = localStorage.getItem('countdown-theme');
-    const initialTheme = savedTheme === 'light' || savedTheme === 'dark' ? savedTheme : baseConfig.theme;
-
-    titleEl.textContent = config.label;
-    mainHeading.textContent = config.title;
-    timezoneEl.textContent = `Target timezone: ${config.timezone}`;
-    secondsEl.closest('.time-segment').hidden = !baseConfig.display.seconds;
-    newYearMessage.hidden = true;
-    newYearMessage.setAttribute('aria-hidden', 'true');
-
-    setTheme(initialTheme);
-    createStars();
-    setRandomQuote();
+    setTheme(savedTheme === 'light' || savedTheme === 'dark' ? savedTheme : baseConfig.theme);
     updateCountdown();
+    form.addEventListener('submit', updateFromForm);
+    resetButton.addEventListener('click', resetForm);
+    themeToggle.addEventListener('click', toggleTheme);
+    shareButton.addEventListener('click', copyShareLink);
     setInterval(updateCountdown, 1000);
-    themeToggleBtn.addEventListener('click', toggleTheme);
 }
 
 document.addEventListener('DOMContentLoaded', init);
